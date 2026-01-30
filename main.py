@@ -51,6 +51,9 @@ if __name__ == "__main__":
         elif case == "5":
             import tarefa05
             tarefa05.main()
+        elif case == "6":
+            import tarefa06
+            tarefa06.main()
         elif case == "7":
             import tarefa07
             try:
@@ -59,6 +62,37 @@ if __name__ == "__main__":
             except:
                 print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
             tarefa07.main(n, m)
+        elif case == "8":
+            import tarefa08
+            try:
+                n = int(input("Selecione o valor de n: "))
+            except:
+                print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
+            tarefa08.main(n)
+        elif case == "9":
+            import tarefa09
+            try:
+                n = int(input("Selecione o valor de n: "))
+                m = int(input("Selecione o valor de m: "))
+            except:
+                print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
+            is_simetric = bool(input("Matriz simetrica? "))
+            tarefa09.main(n, m, simetric=is_simetric)
+        elif case == "10":
+            import tarefa10
+            try:
+                n = int(input("Selecione o valor de n: "))
+            except:
+                print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
+            tarefa10.main(n)
+        elif case == "11":
+            import tarefa11
+            try:
+                n = int(input("Selecione o valor de n: "))
+                m = int(input("Selecione o valor de m: "))
+            except:
+                print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
+            tarefa11.main(n, m)
         elif case == "0":
             print("Encerrando...")
             break
