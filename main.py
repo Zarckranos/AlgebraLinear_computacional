@@ -93,6 +93,13 @@ if __name__ == "__main__":
             except:
                 print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
             tarefa11.main(n, m)
+        elif case == "12":
+            import tarefa12
+            try:
+                n = int(input("Selecione o valor de n: "))
+            except:
+                print("VALOR DIGITADO INCORRETO, APENAS INTEIROS!")
+            tarefa12.main()
         elif case == "0":
             print("Encerrando...")
             break

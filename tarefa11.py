@@ -12,6 +12,7 @@ def main(n=3, m=3):
         [2, 0, 3]
     ])
     print("\nMatriz A:\n", A)
+    print(f"np.linalg.eig(A): \n{np.linalg.eig(A)}\n")
 
     vals, vecs = qr_symmetric(A)
 
@@ -27,6 +28,18 @@ def main(n=3, m=3):
         [0, 4, 5],
         [0, -6, 7]
     ])
+    print("\nMatriz B:\n", B)
+    print(f"np.linalg.eig(B): \n {np.linalg.eig(B)}\n")
+
+    vals, vecs, B_ = qr_nonsymmetric(B)
+
+    print("Autovalores (não-simétrica):")
+    print(vals)
+
+    print("\nAutovetores:")
+    print(vecs)
+
+    print("Matriz BUT:\n", B_)
 
 if __name__ == "__main__":
     main()

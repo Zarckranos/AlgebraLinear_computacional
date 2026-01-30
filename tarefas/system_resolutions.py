@@ -3,7 +3,7 @@ import numpy as np
 ###############################################################################
 # TAREFA 01: Eliminação de Gauss                                              #
 ###############################################################################
-def gauss_elimination(A, b):
+def gauss_elimination(A, b, parcial_pivot=True):
     """
     Método de eliminação de Gauss com pivotação parcial (depois estender para
     pivotação total) para resolução de sistemas de equações algébricas lineares
@@ -15,17 +15,40 @@ def gauss_elimination(A, b):
     b = b.astype(float).copy()
     n = len(b)
 
+    col_perm = np.arange(n)
     for k in range(n - 1):
-        # Pivotação parcial
-        max_index = np.argmax(np.abs(A[k:, k])) + k
-        if A[max_index, k] == 0:
-            print("Matriz singular!")
-            return 0
-        
-        if max_index != k:
-            A[[k, max_index]] = A[[max_index, k]]
-            b[[k, max_index]] = b[[max_index, k]]
+        if parcial_pivot:
+            # Pivotação parcial
+            max_index = np.argmax(np.abs(A[k:, k])) + k
+            if A[max_index, k] == 0:
+                print("Matriz singular!")
+                return 0
+            
+            if max_index != k:
+                A[[k, max_index]] = A[[max_index, k]]
+                b[[k, max_index]] = b[[max_index, k]]
+        else:
+            # Pivotação total
+            sub_matrix = np.abs(A[k:, k:])
+            i_max, j_max = np.unravel_index(np.argmax(sub_matrix), sub_matrix.shape)
+            i_max += k
+            j_max += k
 
+            if abs(A[i_max, j_max]) < 1e-12:
+                print("Matriz singular!")
+                return 0
+            
+            # Troca de linhas
+            if i_max != k:
+                A[[k, i_max]] = A[[i_max, k]]
+                b[[k, i_max]] = b[[i_max, k]]
+            
+            # Troca de colunas
+            if j_max != k:
+                A[:, [k, j_max]] = A[:, [j_max, k]]
+                col_perm[[k< j_max]] = col_perm[[j_max, k]]
+            
+        # Eliminação
         for i in range(k + 1, n):
             m = A[i, k] / A[k, k]
             A[i, k:] -= m * A[k, k:]
@@ -35,6 +58,13 @@ def gauss_elimination(A, b):
     x = np.zeros(n)
     for i in range(n-1, -1, -1):
         x[i] = (b[i] - np.dot(A[i, i+1:], x[i+1:])) / A[i, i]
+
+    # Reorganiza solução no caso de pivotação total
+    if not parcial_pivot:
+        x_final = np.zeros(n)
+        for i in range(n):
+            x_final[col_perm[i]] = x[i]
+        return x_final
 
     return x
 
@@ -164,7 +194,7 @@ def rref(A):
 ###############################################################################
 # TAREFA 05: Decomposição de Cholesky                                         #
 ###############################################################################
-def cholesky():
+def cholesky(A):
     """
     Implementar a decomposição SS^T de Cholesky de uma matriz simétrica e
     positiva definida.
@@ -173,20 +203,68 @@ def cholesky():
     da diagonal envolver a raíz quadrada de um número negativo, o código deve
     escrever a mensagem "A Matriz não é positiva definida." e parar a execução.
     """
-    ...
+    A = np.array(A, dtype=float)
+    n = A.shape[0]
+
+    # Verificar simetria
+    if not np.allclose(A, A.T, atol=1e-12):
+        print("A matriz não é simétrica.")
+        return None
+    
+    S = np.zeros_like(A)
+    for i in range(n):
+        for j in range(i + 1):
+            soma = sum(S[i, k] * S[j, k] for k in range(j))
+
+            if i == j:
+                valor = A[i, i] - soma
+                if valor <= 0:
+                    print("A Matriz não é positiva definida.")
+                    return None
+                S[i, j] = np.sqrt(valor)
+            else:
+                S[i, j] = (A[i, j] - soma) / S[j, j]
+        
+    return S
 
 ###############################################################################
 # TAREFA 06: Ortogonalização de Gram-Schmidt                                  #
 ###############################################################################
-def gram_schmidt():
+def gram_schmidt(V, m):
     """
     Implemente o método de ortogonalização de Gram-Schmidt, faça o que se pede:
-     - 1) Dado um conjunto de n vetores do Rm  com n < m, estenda esse conjunto
+     - 1) Dado um conjunto de n vetores do Rm com n < m, estenda esse conjunto
        de vetores para achar uma base do Rm
      - 2) Use o processo de ortogonalização de Gram-Schmidt sobre a base
        estendida, para encontrar uma base ortonormal do Rm.
     """
-    ...
+    # Estende um conjunto LI para uma base de R^m
+    basis = [v.astype(float) for v in V]
+
+    for e in np.eye(m):
+        candidate = basis + [e]
+        M = np.column_stack(candidate)
+
+        if np.linalg.matrix_rank(M) > len(basis):
+            basis.append(e)
+
+        if len(basis) == m:
+            break
+    
+    print(f"Base estendida: {basis}")
+
+    # Aplica o processo de Gram-Schmidt
+    U = []
+    for v in basis:
+        u = v.astype(float).copy()
+        for q in U:
+            # Projeção: u = u - <u, q> * q
+            u -= np.dot(q, u) * q
+
+        if np.linalg.norm(u) > 1e-10:
+            U.append(u / np.linalg.norm(u))
+
+    return np.array(U) # base ortonormal
 
 ###############################################################################
 # TAREFA 07: Mínimos quadrados                                                #

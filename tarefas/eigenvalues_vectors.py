@@ -243,7 +243,34 @@ def extract_eigenvalues_BUT(B, tol=1e-10):
 
     i = 0
     while i < n:
-        ...
+        # bloco 2x2
+        if i < n - 1 and abs(B[i + 1, i]) > tol:
+            a = B[i, i]
+            b = B[i, i + 1]
+            c = B[i + 1, i]
+            d = B[i + 1, i + 1]
+
+            trace = a + d
+            det = a * d - b * c
+
+            disc = trace**2 - 4 * det
+
+            if disc >= 0:
+                l1 = (trace + np.sqrt(disc)) / 2
+                l2 = (trace - np.sqrt(disc)) / 2
+            else:
+                real = trace / 2
+                imag = np.sqrt(-disc) / 2
+                l1 = real + 1j * imag
+                l2 = real - 1j * imag
+
+            eigenvalues.extend([l1, l2])
+            i += 2
+
+        # bloco 1x1
+        else:
+            eigenvalues.append(B[i, i])
+            i += 1
 
     return np.array(eigenvalues)
 
@@ -259,5 +286,49 @@ def qr_nonsymmetric(A, tol=1e-10):
 ###############################################################################
 # TAREFA 12: Decomposição SVD                                                 #
 ###############################################################################
-def svd():
-    ...
+def svd(A, tol=1e-10):
+    """
+    Implementar o a decomposição SVD de uma matriz qualquer A mxn
+    1) Entrar com a matriz
+    2) Encontrar e imprimir as matrizes U, Sigma, V
+    3) Mostrar que o produto U . Sigma . V^T  = A
+
+
+    Obs.: Quando necessário, use extensão de base e ortogonalização de 
+          Gram-Schmidt para encontrar U ou V completas.
+    """
+    from tarefas.system_resolutions import gram_schmidt
+
+    m, n = A.shape
+
+    # Autovalores de A^T A
+    AtA = A.T @ A
+    eigvals, V = np.linalg.eig(AtA)
+
+    idx = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[idx]
+    V = V[:, idx]
+
+    # Valores singulares
+    singular_values = np.sqrt(np.maximum(eigvals, 0))
+
+    Sigma = np.zeros((m, n))
+    for i in range(min(m, n)):
+        Sigma[i, i] = singular_values[i]
+
+    # U = A V / σ
+    U_partial = []
+    for i in range(len(singular_values)):
+        if singular_values[i] > tol:
+            u = A @ V[:, i] / singular_values[i]
+            U_partial.append(u)
+
+    U_partial = np.array(U_partial)
+
+    # extensão de base U com Gram-Schmidt quando necessário
+    if U_partial.shape[0] < m:
+        U = gram_schmidt(U_partial, m)
+    else:
+        U = U_partial
+
+    return U.T, Sigma, V
